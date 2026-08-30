@@ -42,7 +42,6 @@ jobs:
         python -m flake8 backend/
         cd backend/
         python manage.py test
-        - name: Debug: Check files before build      
   build_and_push_to_docker_hub:
     name: Push Docker image to DockerHub
     runs-on: ubuntu-latest
