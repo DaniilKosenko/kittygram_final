@@ -9,25 +9,28 @@ services:
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+
   backend:
-    build: ./backend/
+    build: ./backend/       # Оставляем: папка backend есть
     env_file: .env
-    volumes:
-    - static:/static
-    - media:/media
-    depends_on:
-    - db
-  frontend:
-    env_file: .env
-    build: ./frontend/
-    command: cp -r /app/build/. /static/
     volumes:
       - static:/static
+      - media:/media
+    depends_on:
+      - db
+
   gateway:
-    build: ./nginx/
+    image: nginx:1.23       
     env_file: .env
     ports:
       - 9000:80
     volumes:
-      - static:/static
+      - static:/static       # Тот же том, что и у backend!
       - media:/media
+    depends_on:
+      - backend
+
+volumes:
+  pg_data:
+  static:
+  media:
