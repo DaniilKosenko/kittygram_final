@@ -43,7 +43,7 @@ jobs:
         cd backend/
         python manage.py test
         - name: Debug: Check files before build
-        run: |
+      run: |
           echo "--- СОДЕРЖИМОЕ .dockerignore В КОРНЕ ---"
           if [ -f .dockerignore ]; then cat .dockerignore; else echo "Нет файла .dockerignore в корне"; fi
           
