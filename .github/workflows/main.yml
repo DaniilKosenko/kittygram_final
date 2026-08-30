@@ -42,6 +42,22 @@ jobs:
         python -m flake8 backend/
         cd backend/
         python manage.py test
+        - name: Debug: Check files before build
+        run: |
+          echo "--- СОДЕРЖИМОЕ .dockerignore В КОРНЕ ---"
+          if [ -f .dockerignore ]; then cat .dockerignore; else echo "Нет файла .dockerignore в корне"; fi
+          
+          echo "--- СОДЕРЖИМОЕ .dockerignore ВНУТРИ backend ---"
+          if [ -f ./backend/.dockerignore ]; then cat ./backend/.dockerignore; else echo "Нет файла .dockerignore внутри backend"; fi
+
+          echo "--- ФАЙЛЫ В КОРНЕ ПРОЕКТА ---"
+          ls -la
+          
+          echo "--- ФАЙЛЫ ВНУТРИ ПАПКИ BACKEND ---"
+          ls -la ./backend/
+          
+          echo "--- ПРОВЕРКА: ЕСТЬ ЛИ DOCKERFILE? ---"
+          if [ -f ./backend/Dockerfile ]; then echo "✅ Dockerfile найден!"; else echo "❌ Dockerfile НЕ найден!"; fi
   build_and_push_to_docker_hub:
     name: Push Docker image to DockerHub
     runs-on: ubuntu-latest
