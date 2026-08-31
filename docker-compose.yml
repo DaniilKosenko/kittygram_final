@@ -8,7 +8,13 @@ services:
     image: postgres:13
     env_file: .env
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s       # Проверять каждые 5 секунд
+      timeout: 5s        # Если проверка длится дольше 5 сек — считаем неудачей
+      retries: 5         # Сколько раз подряд должно быть "не готово", чтобы считать базу больной
+      start_period: 40s  # Даем базе 40 секунд на первичный старт, прежде чем начинать проверку (важно!)
   backend:
     image: daniil1980/kittygram_backend:latest
     env_file: .env
@@ -16,7 +22,8 @@ services:
     - static:/static
     - media:/media
     depends_on:
-    - db
+    - db:
+        condition: service_healthy
   frontend:
     env_file: .env
     image: daniil1980/kittygram_frontend:latest
