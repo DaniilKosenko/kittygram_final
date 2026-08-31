@@ -1,42 +1,32 @@
 #!/bin/sh
 set -e
 
-echo "🔍 Шаг 1: Ожидание готовности базы данных..."
+echo "🔍 Шаг 1: Ждем, пока база данных станет доступна..."
 
-# Ждем, пока pg_isready скажет, что база готова принимать соединения
-# Это может занять от 10 до 60 секунд при первом старте
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_DB" > /dev/null 2>&1; do
-  echo "⏳ База еще не готова... ждем 2 секунды."
-  sleep 2
+# Ждем до 120 секунд (2 минуты), пока pg_isready не скажет ОК
+for i in $(seq 1 120); do
+  if pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_DB" > /dev/null 2>&1; then
+    echo "✅ База готова!"
+    break
+  else
+    echo "⏳ База не готова (попытка $i/120)... ждем 2 сек."
+    sleep 2
+  fi
 done
 
-echo "✅ База готова! Начинаем подготовку."
+# Финальная проверка
+if ! pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_DB" > /dev/null 2>&1; then
+  echo "❌ Критическая ошибка: База не запустилась за 2 минуты."
+  exit 1
+fi
 
-# ---------------------------------------------------------
-# ВАЖНО: ОЧИСТКА СХЕМЫ ДЛЯ ИСПРАВЛЕНИЯ ОШИБКИ DUPLICATE KEY
-# ---------------------------------------------------------
-echo "🧹 Шаг 2: Очистка схемы базы данных (удаление старых объектов)..."
-
-# Используем psql для удаления схемы public со всеми объектами (CASCADE)
-# Это решает проблему с "duplicate key value violates unique constraint"
-# PGPASSWORD нужен, так как psql не принимает пароль через переменную окружения иначе в одной строке
-PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_DB" -c "DROP SCHEMA IF EXISTS public CASCADE;"
-
-# Создаем схему заново (она обязательна для работы)
-PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_DB" -c "CREATE SCHEMA IF NOT EXISTS public;"
-
-echo "🧹 Очистка завершена. Схема создана заново."
-
-# ---------------------------------------------------------
-# ДАЛЕЕ СТАНДАРТНЫЕ ДЕЙСТВИЯ
-# ---------------------------------------------------------
-
-echo "🚀 Шаг 3: Запуск миграций Django..."
+echo "🚀 Шаг 2: Запуск миграций Django..."
+# Миграции сами создадут таблицу django_migrations, если её нет.
+# Если есть конфликт - мы его решим вручную.
 python manage.py migrate --noinput
 
-echo "📦 Шаг 4: Сбор статических файлов..."
-# --noinput критически важен, чтобы избежать ошибки EOFError
+echo "📦 Шаг 3: Сбор статики..."
 python manage.py collectstatic --noinput
 
-echo "🚀 Шаг 5: Запуск Gunicorn..."
+echo "🚀 Шаг 4: Запуск Gunicorn..."
 exec gunicorn kittygram_backend.wsgi:application --bind 0.0.0.0:9000
