@@ -27,6 +27,7 @@ COPY . .
 # Копируем наш скрипт-обертку и делаем его исполняемым
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 
 # --- ТОЧКА ЗАПУСКА ---
 # ENTRYPOINT запускает скрипт при старте контейнера.
