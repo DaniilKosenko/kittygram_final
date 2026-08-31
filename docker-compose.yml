@@ -10,7 +10,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
   backend:
-    image: ${{ secrets.DOCKER_USERNAME }}/kittygram_backend:latest
+    image: daniil1980/kittygram_backend:latest
     env_file: .env
     volumes:
     - static:/static
@@ -19,12 +19,12 @@ services:
     - db
   frontend:
     env_file: .env
-    image: ${{ secrets.DOCKER_USERNAME }}/kittygram_frontend:latest
+    image: daniil1980/kittygram_frontend:latest
     command: cp -r /app/build/. /static/
     volumes:
       - static:/static
   gateway:
-    image: ${{ secrets.DOCKER_USERNAME }}/kittygram_gateway:latest
+    image: daniil1980/kittygram_gateway:latest
     env_file: .env
     ports:
       - 9000:80
