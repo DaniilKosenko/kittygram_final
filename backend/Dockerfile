@@ -28,8 +28,3 @@ COPY . .
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-
-# --- ТОЧКА ЗАПУСКА ---
-# ENTRYPOINT запускает скрипт при старте контейнера.
-# CMD здесь не нужен, так как entrypoint.sh сам решает, что делать (ждать, мигрировать, запускать gunicorn).
-ENTRYPOINT ["/entrypoint.sh"]
