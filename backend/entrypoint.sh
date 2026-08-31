@@ -19,4 +19,4 @@ echo "📦 Шаг 3: Сбор статики (БЕЗ ВОПРОСОВ!)..."
 python manage.py collectstatic --noinput
 
 echo "🚀 Шаг 4: Запуск Gunicorn..."
-exec gunicorn kittygram_backend.wsgi:application --bind 0.0.0.0:8000
+exec gunicorn kittygram_backend.wsgi:application --bind 0.0.0.0:9000
