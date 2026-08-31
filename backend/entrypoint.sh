@@ -1,25 +1,36 @@
 #!/bin/sh
 set -e
 
-echo "🔍 Проверка подключения к базе данных..."
+echo "🔍 Начинаем проверку готовности базы данных..."
 
-# Цикл ожидания: pg_isready вернёт 0, если база готова
-# Флаг -h: хост, -p: порт, -U: пользователь, -d: имя базы
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_DB"; do
-  echo "⏳ База данных ещё не готова... ждём 2 секунды."
-  sleep 2
+# Увеличиваем количество попыток и время ожидания.
+# pg_isready будет стучаться каждые 2 секунды.
+# Мы даем базе до 60 секунд на старт (30 попыток * 2 сек).
+for i in $(seq 1 30); do
+  if pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_DB" > /dev/null 2>&1; then
+    echo "✅ База данных готова!"
+    break
+  else
+    echo "⏳ База данных ещё не готова (попытка $i/30)... ждём 2 секунды."
+    sleep 2
+  fi
 done
 
-echo "✅ База данных готова!"
+# Если после 60 секунд база всё ещё не готова — выходим с ошибкой
+if ! pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_DB" > /dev/null 2>&1; then
+  echo "❌ Критическая ошибка: База данных не запустилась за 60 секунд!"
+  exit 1
+fi
 
-# Запуск миграций
+# Теперь, когда база точно готова, запускаем миграции
 echo "🚀 Запуск миграций Django..."
 python manage.py migrate --noinput
 
-# Сбор статических файлов
+# Сбор статики
 echo "📦 Сбор статических файлов..."
+# Используем --noinput, чтобы скрипт не спрашивал "Are you sure?" (это вызывало твою ошибку EOFError)
 python manage.py collectstatic --noinput
 
-# Запуск сервера (Gunicorn)
+# Запуск сервера
 echo "🚀 Запуск Gunicorn..."
-exec gunicorn kittygram.wsgi:application --bind 0.0.0.0:9000
+exec gunicorn kittygram.wsgi:application --bind 0.0.0.0:8000
