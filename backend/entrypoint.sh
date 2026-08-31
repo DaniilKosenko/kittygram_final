@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 
-echo "🔍 Ждем базу данных..."
+echo "🔍 Шаг 1: Ждем базу данных..."
 
-# 1. Ждем базу
+# Ждем базу
 until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_DB" > /dev/null 2>&1; do
   echo "⏳ База не готова... ждем 2 сек."
   sleep 2
@@ -11,15 +11,12 @@ done
 
 echo "✅ База готова!"
 
-# 2. Миграции (--noinput здесь тоже хорош, но migrate сам не спрашивает)
-echo "🚀 Запуск миграций..."
+echo "🚀 Шаг 2: Запуск миграций..."
 python manage.py migrate --noinput
 
-# 3. СБОР СТАТИКИ (САМОЕ ВАЖНОЕ МЕСТО!)
-echo "📦 Сбор статических файлов..."
-# 👇 ОБЯЗАТЕЛЬНО добавь --noinput, иначе будет EOFError 👇
+echo "📦 Шаг 3: Сбор статики (БЕЗ ВОПРОСОВ!)..."
+# 👇 ЭТА СТРОКА КРИТИЧНА. Без --noinput будет EOFError 👇
 python manage.py collectstatic --noinput
 
-# 4. Запуск Gunicorn
-echo "🚀 Запуск Gunicorn..."
-exec gunicorn kittygram_backend.wsgi:application --bind 0.0.0.0:9000
+echo "🚀 Шаг 4: Запуск Gunicorn..."
+exec gunicorn kittygram_backend.wsgi:application --bind 0.0.0.0:8000
