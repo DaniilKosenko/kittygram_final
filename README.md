@@ -1,3 +1,4 @@
+[![CI](https://github.com/DaniilKosenko/kittygram_final/actions/workflows/main.yml/badge.svg)](https://github.com/ТВОЙ_НИК/kittygram_final/actions)
 #  Проект Kittygram_final
 
 ## Описание
