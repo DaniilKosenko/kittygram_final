@@ -28,6 +28,20 @@ dockerhub_username: ваш_логин_на_докерхабе
 Скопируйте содержимое файла `.github/workflows/main.yml` в файл `kittygram_workflow.yml` в корневой директории проекта.
 
 Для локального запуска тестов создайте виртуальное окружение, установите в него зависимости из backend/requirements.txt и запустите в корневой директории проекта `pytest`.
+## Прмеры API
+- Получить список всех котиков (GET)
+  http://kittyproject.hopto.org:9000/api/cats/
+- Создать нового котика (POST)
+  -X POST http://kittyproject.hopto.org:9000/api/cats/\
+  -H "Content-Type: application/json" \
+  -d '{"name": "Барсик", "image": "path/to/image.jpg"}'
+- Получить одного конкретного котика (GET с ID)
+  http://kittyproject.hopto.org:9000/api/cats/1
+- Обновить котика (PUT или PATCH)
+  -X PATCH http://kittyproject.hopto.org:9000/api/cats/1/ \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Барсик Суперстар"}'
+
 
 ## Чек-лист для проверки перед отправкой задания
 
