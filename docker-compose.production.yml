@@ -9,6 +9,7 @@ services:
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+    restart: always
   backend:
     image: daniil1980/kittygram_backend:latest
     env_file: .env
@@ -17,12 +18,14 @@ services:
     - media:/app/media
     depends_on:
     - db
+    restart: always
   frontend:
     env_file: .env
     image: daniil1980/kittygram_frontend:latest
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - static:/frontend_static
+    restart: always
   gateway:
     image: daniil1980/kittygram_gateway:latest
     env_file: .env
@@ -33,3 +36,4 @@ services:
     volumes:
       - static:/staticfiles
       - media:/media
+    restart: always
