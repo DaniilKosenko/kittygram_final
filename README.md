@@ -1,10 +1,21 @@
-#  Как работать с репозиторием финального задания
+[![CI](https://github.com/DaniilKosenko/kittygram_final/actions/workflows/main.yml/badge.svg)](https://github.com/DaniilKosenko/kittygram_final/actions)
+#  Проект Kittygram_final
 
-## Что нужно сделать
+## Описание
 
-Настроить запуск проекта Kittygram в контейнерах и CI/CD с помощью GitHub Actions
+Проект позволяет автоматически вносить изменения в развернутое на удаленном сервере приложение
 
-## Как проверить работу с помощью автотестов
+## Установка
+- очистите диск сервера от лишних данных:
+- удалите кеш npm: npm cache clean --force;
+- удалите кеш APT: sudo apt clean.
+- удалите старые системные логи: sudo journalctl --vacuum-time=1d
+- полезно будет выполнить команду sudo docker system prune -af: она уберёт все лишние объекты, которые вы могли создать в докере за время выполнения заданий спринта, — неиспользуемые контейнеры, образы и сети.
+- удалите Gunicorn-сервис Kittygram.
+- создайте директорию kittygram/ в домашней директории сервера.
+- поменяйте содержимое файла конфигурации Nginx для Kittygram так, что все запросы пойдут в Docker, на порт 9000.
+- после подготовки — разверните Kittygram на сервере автоматически, с помощью GitHub Actions
+- не забудьте создать в корне проекта файл .env со всеми необходимыми паролями (см. .env.example)
 
 В корне репозитория создайте файл tests.yml со следующим содержимым:
 ```yaml
@@ -17,10 +28,24 @@ dockerhub_username: ваш_логин_на_докерхабе
 Скопируйте содержимое файла `.github/workflows/main.yml` в файл `kittygram_workflow.yml` в корневой директории проекта.
 
 Для локального запуска тестов создайте виртуальное окружение, установите в него зависимости из backend/requirements.txt и запустите в корневой директории проекта `pytest`.
+## Прмеры API
+- Получить список всех котиков (GET)
+  http://kittyproject.hopto.org:9000/api/cats/
+- Создать нового котика (POST)
+  -X POST http://kittyproject.hopto.org:9000/api/cats/\
+  -H "Content-Type: application/json" \
+  -d '{"name": "Барсик", "image": "path/to/image.jpg"}'
+- Получить одного конкретного котика (GET с ID)
+  http://kittyproject.hopto.org:9000/api/cats/1
+- Обновить котика (PUT или PATCH)
+  -X PATCH http://kittyproject.hopto.org:9000/api/cats/1/ \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Барсик Суперстар"}'
+
 
 ## Чек-лист для проверки перед отправкой задания
 
-- Проект Taski доступен по доменному имени, указанному в `tests.yml`.
-- Проект Kittygram доступен по доменному имени, указанному в `tests.yml`.
+- Проект Taski доступен по доменному имени https://taskiproject.work.gd/.
+- Проект Kittygram доступен по доменному имени https://kittyproject.hopto.org/.
 - Пуш в ветку main запускает тестирование и деплой Kittygram, а после успешного деплоя вам приходит сообщение в телеграм.
 - В корне проекта есть файл `kittygram_workflow.yml`.
