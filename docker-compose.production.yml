@@ -34,7 +34,6 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/templates/default.conf.template
       - static:/staticfiles
       - media:/app/media
     restart: always
