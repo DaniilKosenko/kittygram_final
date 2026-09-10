@@ -43,18 +43,14 @@ class CatSerializer(serializers.ModelSerializer):
     achievements = AchievementSerializer(required=False, many=True)
     color = Hex2NameColor()
     age = serializers.SerializerMethodField()
-    image = Base64ImageField(
-            required=False,
-            allow_null=True,
-            source='image.url',
-            read_only=True
-        )
+    image = Base64ImageField(required=False, allow_null=True, write_only=True)
+    image_url = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Cat
         fields = (
             'id', 'name', 'color', 'birth_year', 'achievements',
-            'owner', 'age', 'image', 'image_url'
+            'owner', 'age', 'image_url'
         )
         read_only_fields = ('owner',)
 
