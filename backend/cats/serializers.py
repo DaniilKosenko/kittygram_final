@@ -43,8 +43,12 @@ class CatSerializer(serializers.ModelSerializer):
     achievements = AchievementSerializer(required=False, many=True)
     color = Hex2NameColor()
     age = serializers.SerializerMethodField()
-    image = Base64ImageField(required=False, allow_null=True)
-    image_url = serializers.SerializerMethodField(read_only=True)
+    image = Base64ImageField(
+            required=False, 
+            allow_null=True, 
+            source='image.url',  # <--- ЭТО ГЛАВНОЕ ИЗМЕНЕНИЕ
+            read_only=True       # <--- Важно! Теперь для чтения это просто путь, а не Base64
+        )
 
     class Meta:
         model = Cat
