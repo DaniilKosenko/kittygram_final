@@ -44,10 +44,10 @@ class CatSerializer(serializers.ModelSerializer):
     color = Hex2NameColor()
     age = serializers.SerializerMethodField()
     image = Base64ImageField(
-            required=False, 
-            allow_null=True, 
-            source='image.url',  # <--- ЭТО ГЛАВНОЕ ИЗМЕНЕНИЕ
-            read_only=True       # <--- Важно! Теперь для чтения это просто путь, а не Base64
+            required=False,
+            allow_null=True,
+            source='image.url',
+            read_only=True
         )
 
     class Meta:
