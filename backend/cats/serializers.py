@@ -50,7 +50,7 @@ class CatSerializer(serializers.ModelSerializer):
         model = Cat
         fields = (
             'id', 'name', 'color', 'birth_year', 'achievements',
-            'owner', 'age', 'image_url'
+            'owner', 'age', 'image'
         )
         read_only_fields = ('owner',)
 
@@ -58,6 +58,14 @@ class CatSerializer(serializers.ModelSerializer):
         if obj.image:
             return obj.image.url
         return None
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.image:
+            representation['image'] = instance.image.url
+        else:
+            representation['image'] = None
+        return representation
 
     def get_age(self, obj):
         return dt.datetime.now().year - obj.birth_year
