@@ -25,7 +25,6 @@ services:
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - static:/frontend_static
-      - media:/app/media
     restart: always
   gateway:
     image: daniil1980/kittygram_gateway:latest
