@@ -43,8 +43,7 @@ class CatSerializer(serializers.ModelSerializer):
     achievements = AchievementSerializer(required=False, many=True)
     color = Hex2NameColor()
     age = serializers.SerializerMethodField()
-    image = Base64ImageField(required=False, allow_null=True, write_only=True)
-    image_url = serializers.SerializerMethodField(read_only=True)
+    image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Cat
@@ -59,16 +58,17 @@ class CatSerializer(serializers.ModelSerializer):
             return obj.image.url
         return None
 
+    def get_age(self, obj):
+        return dt.datetime.now().year - obj.birth_year
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        # Если у кота есть фото
         if instance.image:
             representation['image'] = instance.image.url
         else:
             representation['image'] = None
         return representation
-
-    def get_age(self, obj):
-        return dt.datetime.now().year - obj.birth_year
 
     def create(self, validated_data):
         if 'achievements' not in self.initial_data:
