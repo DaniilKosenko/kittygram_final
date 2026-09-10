@@ -36,5 +36,5 @@ services:
       - backend
     volumes:
       - static:/staticfiles
-      - media:/app/media
+      - media:/media
     restart: always
