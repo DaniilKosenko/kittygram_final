@@ -9,6 +9,7 @@ from .models import Achievement, AchievementCat, Cat
 
 
 class Hex2NameColor(serializers.Field):
+
     def to_representation(self, value):
         return value
 
@@ -33,9 +34,7 @@ class Base64ImageField(serializers.ImageField):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
         return super().to_internal_value(data)
 
 
@@ -44,12 +43,16 @@ class CatSerializer(serializers.ModelSerializer):
     color = Hex2NameColor()
     age = serializers.SerializerMethodField()
     image = Base64ImageField(required=False, allow_null=True)
+    image_url = serializers.SerializerMethodField(
+        'get_image_url',
+        read_only=True,
+    )
 
     class Meta:
         model = Cat
         fields = (
             'id', 'name', 'color', 'birth_year', 'achievements',
-            'owner', 'age', 'image'
+            'owner', 'age', 'image', 'image_url'
         )
         read_only_fields = ('owner',)
 
@@ -60,15 +63,6 @@ class CatSerializer(serializers.ModelSerializer):
 
     def get_age(self, obj):
         return dt.datetime.now().year - obj.birth_year
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        # Если у кота есть фото
-        if instance.image:
-            representation['image'] = instance.image.url
-        else:
-            representation['image'] = None
-        return representation
 
     def create(self, validated_data):
         if 'achievements' not in self.initial_data:
@@ -92,11 +86,9 @@ class CatSerializer(serializers.ModelSerializer):
             'birth_year', instance.birth_year
         )
         instance.image = validated_data.get('image', instance.image)
-
         if 'achievements' not in validated_data:
             instance.save()
             return instance
-
         achievements_data = validated_data.pop('achievements')
         lst = []
         for achievement in achievements_data:
@@ -105,6 +97,5 @@ class CatSerializer(serializers.ModelSerializer):
             )
             lst.append(current_achievement)
         instance.achievements.set(lst)
-
         instance.save()
         return instance
